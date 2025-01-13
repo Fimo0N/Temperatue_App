@@ -1,0 +1,245 @@
+openapi: 3.0.0
+info:
+  title: Temperature API
+  version: 1.0.0
+  description: API for managing temperature records
+servers:
+  - url: http://localhost:3000
+
+paths:
+  /login:
+    post:
+      description: Logs in a user and returns a JWT token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        200:
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+        401:
+          description: Unauthorized
+        500:
+          description: Internal Server Error
+  /records:
+    get:
+      security:
+        - bearerAuth: []
+      description: Returns all temperature records
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    rvalue:
+                      type: number
+                    rtype:
+                      type: string
+                    rdate:
+                      type: string
+                      format: date
+                    placeid:
+                      type: integer
+        500:
+          description: Internal Server Error
+    post:
+      security:
+        - bearerAuth: []
+      description: Creates a new temperature record. Requires authentication.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                rvalue:
+                  type: number
+                rtype:
+                  type: string
+                rdate:
+                  type: string
+                  format: date
+                placeid:
+                  type: integer
+      responses:
+        201:
+          description: Record created successfully
+        400:
+          description: Missing required fields
+        500:
+          description: Internal Server Error
+  
+  /records/{id}:
+    get:
+      security:
+        - bearerAuth: []
+      description: Returns a specific temperature record by ID
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: ID of the record to retrieve
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  rvalue:
+                    type: number
+                  rtype:
+                    type: string
+                  rdate:
+                    type: string
+                    format: date
+                  placeid:
+                    type: integer
+        404:
+          description: Record not found
+        500:
+          description: Internal Server Error
+
+    put:
+      summary: Update a temperature record by ID
+      description: Modify an existing temperature record.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                rvalue:
+                  type: number
+                rtype:
+                  type: string
+                rdate:
+                  type: string
+                  format: date
+                placeid:
+                  type: integer
+      responses:
+        '200':
+          description: Record updated successfully
+    delete:
+      summary: Delete a temperature record by ID
+      description: Remove a temperature record from the database.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Record deleted successfully
+
+  /records/above/{threshold}:
+    get:
+      summary: Get records above a certain threshold
+      description: Retrieve temperature records where the value exceeds the specified threshold.
+      parameters:
+        - name: threshold
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        '200':
+          description: A list of temperature records above the threshold
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    rdate:
+                      type: string
+                      format: date
+                    rvalue:
+                      type: number
+  /testextremes:
+    get:
+      summary: Get minimum and maximum temperatures
+      description: Retrieve the minimum and maximum temperatures in the database.
+      responses:
+        '200':
+          description: Min and max temperatures
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  min_temp:
+                    type: number
+                  max_temp:
+                    type: number
+  /records/min/{year}:
+    get:
+      summary: Get minimum temperatures for a specific year
+      description: Retrieve the minimum temperatures recorded in a given year.
+      parameters:
+        - name: year
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Minimum temperatures by year
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    sname:
+                      type: string
+                    rdate:
+                      type: string
+                      format: date
+                    min_temp:
+                      type: number
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

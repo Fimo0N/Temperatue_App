@@ -1,0 +1,10 @@
+1,London,Westminster,Greater London
+2,Paris,Île-de-France,Paris
+3,New York,Manhattan,New York
+4,Tokyo,Shinjuku,Tokyo
+5,Berlin,Mitte,Berlin
+6,Rome,Lazio,Rome
+7,Madrid,Madrid,Madrid
+8,Dublin,Dublin,Dublin
+9,Edinburgh,City of Edinburgh,Scotland
+10,Amsterdam,Noord-Holland,North Holland
