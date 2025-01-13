@@ -8,34 +8,31 @@ const swaggerSpec = require('./swagger');
 
 const JWT_SECRET = '1234';
 const app = express();
-const port = 3000; // You can choose any port
-
-// Middleware to parse JSON request bodies
+const port = 3000; 
 
 app.use(bodyParser.json());
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-// MySQL connection configuration
+// Connection with Database
 const dbConfig = {
     host: 'localhost',
     user: 'root',
-    password: '', // Your MySQL root password (if any)
+    password: '',
     database: 'temperature_data'
 };
 
-// Create a database connection pool (for efficient connection management)
 const pool = mysql.createPool(dbConfig);
 
 function authenticateToken(req, res, next) {
     const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1]; // Get the token from the header
+    const token = authHeader && authHeader.split(' ')[1]; 
 
-    if (token == null) return res.sendStatus(401); // If no token, send 401 Unauthorized
+    if (token == null) return res.sendStatus(401); //Token--> Missing then Unauthorized
 
     jwt.verify(token, JWT_SECRET, (err, user) => {
-        if (err) return res.sendStatus(403); // If token is invalid, send 403 Forbidden
-        req.user = user; // Add the user to the request object
-        next(); // Proceed to the next middleware or route handler
+        if (err) return res.sendStatus(403); //Token--> Forbidden
+        req.user = user; 
+        next(); 
     });
 }
 
@@ -44,7 +41,8 @@ app.get('/', (req, res) => {
     res.send('Temperature API is running!');
 });
 
-// Example: Get all records
+
+// To Get all records
 app.get('/records', async (req, res) => {
     try {
         const [rows] = await pool.query('SELECT * FROM records');
@@ -55,7 +53,7 @@ app.get('/records', async (req, res) => {
     }
 });
 
-// Example: Get a record by ID
+// Get the record by ID
 app.get('/records/:id', async (req, res) => {
     try {
         const [rows] = await pool.query('SELECT * FROM records WHERE id = ?', [req.params.id]);
@@ -69,41 +67,44 @@ app.get('/records/:id', async (req, res) => {
     }
 });
 
+// Login route Authenticating the user
 app.post('/login', (req, res) => {
     const { username, password } = req.body;
 
-    // In a real application, you would verify credentials against a database
+    
     if (username === 'testuser' && password === 'password') {
-        const user = { username: username }; // The payload of the JWT
-        const token = jwt.sign(user, JWT_SECRET, { expiresIn: '1h' }); // Token expires in 1 hour
+        const user = { username: username }; 
+        const token = jwt.sign(user, JWT_SECRET, { expiresIn: '1h' });
         res.json({ token });
     } else {
         res.status(401).json({ message: 'Invalid credentials' });
     }
 });
 
+// Post Request --> Needs Authetication
 app.post('/records', authenticateToken, async (req, res) => {
     try {
         const { rvalue, rtype, rdate, placeid } = req.body;
 
-        // Basic input validation
+     
         if (!rvalue || !rtype || !rdate || !placeid) {
             return res.status(400).send("Missing required fields");
         }
 
         const [result] = await pool.query('INSERT INTO records (rvalue, rtype, rdate, placeid) VALUES (?, ?, ?, ?)', [rvalue, rtype, rdate, placeid]);
-        res.status(201).json({ id: result.insertId, message: "Record created successfully" }); // Send the new ID
+        res.status(201).json({ id: result.insertId, message: "Record created successfully" }); // Send new id for new record
     } catch (error) {
         console.error("Error creating record:", error);
         res.status(500).send("Error creating record");
     }
 });
 
+// Put Request --> Needs Authetication
 app.put('/records/:id', authenticateToken, async (req, res) => {
     try {
         const { rvalue, rtype, rdate, placeid } = req.body;
 
-        // Basic input validation
+
          if (!rvalue || !rtype || !rdate || !placeid) {
             return res.status(400).send("Missing required fields");
         }
@@ -121,6 +122,7 @@ app.put('/records/:id', authenticateToken, async (req, res) => {
     }
 });
 
+// Delete Request --> Needs Authetication
 app.delete('/records/:id', authenticateToken, async (req, res) => {
     try {
         const [result] = await pool.query('DELETE FROM records WHERE id = ?', [req.params.id]);
@@ -139,7 +141,7 @@ app.delete('/records/:id', authenticateToken, async (req, res) => {
 // Query 1: Get records with temperature higher than a given threshold
 app.get('/records/above/:threshold', async (req, res) => {
     try {
-        const threshold = parseFloat(req.params.threshold); // Parse to float
+        const threshold = parseFloat(req.params.threshold); 
         if (isNaN(threshold)) {
             return res.status(400).send("Invalid threshold value");
         }
@@ -151,7 +153,7 @@ app.get('/records/above/:threshold', async (req, res) => {
     }
 });
 
-// Query 2: Get min and max temperatures
+// Query 2: Get min and max temperatures from record table
 app.get('/testextremes', async (req, res) => {
     try {
       const [rows] = await pool.query('SELECT MIN(rvalue) AS min_temp, MAX(rvalue) AS max_temp FROM records');
@@ -181,5 +183,5 @@ app.get('/records/min/:year', async (req, res) => {
 
 // Start the server
 app.listen(port, () => {
-    console.log(`Server listening at http://localhost:${port}`);
+    console.log(`Access Server at http://localhost:${port}`);
 });
