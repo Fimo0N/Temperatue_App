@@ -11,7 +11,6 @@ async function importData() {
             database: 'temperature_data'
         });
 
-    
         async function parseTextFile(filePath, delimiter) {
             const fileContent = await fs.readFile(filePath, 'utf-8');
             const lines = fileContent.trim().split('\n');
