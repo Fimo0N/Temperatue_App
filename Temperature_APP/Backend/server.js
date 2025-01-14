@@ -36,12 +36,6 @@ function authenticateToken(req, res, next) {
     });
 }
 
-// Test route
-app.get('/', (req, res) => {
-    res.send('Temperature API is running!');
-});
-
-
 // To Get all records
 app.get('/records', async (req, res) => {
     try {
@@ -60,7 +54,7 @@ app.get('/records/:id', async (req, res) => {
         if (rows.length === 0) {
             return res.status(404).send("Record not found");
         }
-        res.json(rows[0]); // Send only the first row (since ID is unique)
+        res.json(rows[0]);
     } catch (error) {
         console.error("Error fetching record:", error);
         res.status(500).send("Error fetching record");

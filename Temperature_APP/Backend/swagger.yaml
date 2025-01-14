@@ -37,8 +37,6 @@ paths:
           description: Internal Server Error
   /records:
     get:
-      security:
-        - bearerAuth: []
       description: Returns all temperature records
       responses:
         200:
@@ -93,8 +91,6 @@ paths:
   
   /records/{id}:
     get:
-      security:
-        - bearerAuth: []
       description: Returns a specific temperature record by ID
       parameters:
         - in: path
@@ -128,6 +124,8 @@ paths:
           description: Internal Server Error
 
     put:
+      security:
+          - bearerAuth: []
       summary: Update a temperature record by ID
       description: Modify an existing temperature record.
       parameters:
@@ -156,6 +154,8 @@ paths:
         '200':
           description: Record updated successfully
     delete:
+      security:
+          - bearerAuth: []
       summary: Delete a temperature record by ID
       description: Remove a temperature record from the database.
       parameters:
